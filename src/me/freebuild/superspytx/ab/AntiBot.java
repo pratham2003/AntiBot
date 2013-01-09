@@ -34,6 +34,24 @@ public class AntiBot extends JavaPlugin {
 	
 	public void onEnable() {
 		instance = this;
+        
+        /* Check if a malicious package is loaded */
+        boolean safe = false;
+        try {
+            Thread.currentThread().getContextClassLoader().loadClass("org.bukkit.craftbukkit.libs.org.objectweb.asm.commons.RemappingClassAdapter");
+            Thread.currentThread().getContextClassLoader().loadClass("com.bergerkiller.bukkit.noverpackage.org.objectweb.asm.commons.RemappingClassAdapter");
+            Thread.currentThread().getContextClassLoader().loadClass("org.objectweb.asm.commons.RemappingClassAdapter");
+        } catch (Throwable e) {
+            safe = true;
+        }
+        
+        if (!safe) {
+            getLogger().warning("It appears a malicious java library was loaded during startup of AntiBot");
+            getLogger().warning("This either means you are using a malicious build of CraftBukkit, or a malicious plugin was loaded.");
+            getLogger().warning("For security reasons, and security only, AntiBot will disable itself until this library is removed.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 		
 		/* Make plugin directory if it doesn't exist.*
 		 * This should fix the GeoIP problem */
